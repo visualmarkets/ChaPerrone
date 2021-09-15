@@ -27,11 +27,11 @@ mergeData <-
         preference == "Fifth Preference" ~ 5,
         preference == "Sixth Preference" ~ 6
       )
-  ) %>%
-inner_join(capacityTbl, by = "event") %>%
+  ) %>% 
+inner_join(capacityTbl, by = "event") %>% 
 inner_join(req_points, by = "name") %>%
 arrange(name, preference)
-
+  
 preferenceData <- mergeData %>% group_by(name) %>% group_split() %>% map(~{.x$id})
 
 capacity <- capacityTbl %>% arrange(id) %>% pull(capacity)

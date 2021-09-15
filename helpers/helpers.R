@@ -7,8 +7,8 @@ weight <-
   function(student, course) {
     p <- which(as.numeric(course) == preferences(as.numeric(student)))
     as.integer(
-      if(length(p) == 0){
-        100000000
+      if (length(p) == 0) {
+        length(preferences(as.numeric(student))) + 1
       } else {
         p
       }

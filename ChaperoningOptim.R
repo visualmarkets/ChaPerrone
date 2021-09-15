@@ -33,30 +33,33 @@ m <- nrow(capacityTbl)
 # Required Chaperone Points
 p <- capacityTbl$points
 
-# Create capabity vector
+# Create capacity vector
 capacity <- capacityTbl %>% arrange(id) %>% pull(capacity)
 
 ### Optim Model ###
 model <-
   MIPModel() %>%
   
-  # 1 iff student i is assigned to course m
+  # 1 if student i is assigned to course m
   add_variable(x[i, j], i = 1:n, j = 1:m, type = "binary") %>%
   
   # maximize the preferences
   set_objective(sum_expr(weight(i, j) * x[i, j], i = 1:n, j = 1:m), sense = "min") %>%
   
   # we cannot exceed the capacity of a course
-  add_constraint(sum_expr(x[i, j], i = 1:n) <= capacity[j], j = 1:m)
+  add_constraint(sum_expr(x[i, j], i = 1:n) <= capacity[j], j = 1:m) %>% 
+  
+  add_constraint(sum_expr(x[i, j], i = 1:n) >= 1, j = 1:m)
 
 # Set constraints for chaperone points
-for(.x in 1:n){
-  model <- 
-    model %>% 
+for (.x in 1:n) {
+  reqPoints <- mergeData %>% filter(i == .x) %>% pull(req_points) %>% unique()
+  model <-
+    model %>%
     # Each chaperone needs required points for events
-    add_constraint(sum_expr(x[i, j] * p[j], j = 1:m) == mergeData %>% filter(i == .x) %>% pull(req_points), i = .x) # %>%
+    add_constraint(sum_expr(x[i, j] * p[j], j = 1:m) == reqPoints, i = .x)
 }
-  
+
 # Gather results
 result <- solve_model(model, with_ROI(solver = "glpk", verbose = TRUE))
 
@@ -70,10 +73,11 @@ solution <-
   get_solution(x[i,j]) %>%
   filter(value == 1L) %>%  
   select(i, j) %>% 
-  inner_join(mergeData, by = c("i", "j" = "id"))
+  inner_join(mergeData, by = c("i", "j" = "id")) %>% 
+  mutate(name = factor(name), event = factor(event))
 
 # Observe name level breakdown
-solution %>% group_by(name) %>% summarize(best = min(preference), worst = max(preference), avg = mean(preference)) %>% arrange(desc(best))
+solution %>% group_by(name) %>% summarize(best = min(preference), worst = max(preference), avg = mean(preference)) %>% arrange(desc(avg))
 
 # Find people with less than 3 points
 solution %>% group_by(name) %>% summarize(sum = sum(points)) %>% filter(sum != 3L)
@@ -136,4 +140,4 @@ ggplot(plot_data, aes(x = event, y = count, fill = preference)) +
 # Wrirte result CSV
 solution %>% write_csv("solutions.csv")
   
-solution
+View(solution)
