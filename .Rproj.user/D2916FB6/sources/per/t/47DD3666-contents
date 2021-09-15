@@ -1,0 +1,33 @@
+library(readxl)
+library(tidyverse)
+
+chaperoneData <- readxl::read_excel("Chap Preferences.xlsx", sheet = 1)
+
+mergeData <-
+  chaperoneData %>% 
+    tidyr::gather("preference", "event", -Name) %>% 
+    mutate(
+      preference = case_when(preference == "Please select your top preference from the drop-down list." ~ 1,
+                      preference == "Second preference" ~ 2,
+                      preference == "Third Preference" ~ 3,
+                      preference == "Fourth Preference" ~ 4,
+                      preference == "Fifth Preference" ~ 5,
+                      preference == "Sixth Preference" ~ 6)
+    ) %>% 
+  rename(name = Name) %>% 
+  inner_join(capacityTbl, by = "event") %>% arrange(name, preference)
+
+capacityTbl <- 
+  readxl::read_excel("Chap Preferences.xlsx", sheet = 2) %>% 
+  select(event = Outing, capacity = `Number of People Needed`, points = Points) %>% 
+  mutate(id = row_number())
+
+# mergeData %>% group_by(name) %>% mutate(test = length(unique(event)) - n()) %>% View()
+
+chaperones <- mergeData %>% distinct(name) %>% ungroup() %>% mutate(i = row_number())
+
+preference_data <- mergeData %>% group_by(name) %>% group_split() %>% map(~{.x$id})
+
+capacity <- capacityTbl %>% arrange(id) %>% pull(capacity)
+
+req_points <- readxl::read_excel("Chap Preferences.xlsx", sheet = 3) %>% left_join(chaperones, by = "name")

@@ -1,0 +1,27 @@
+{
+    "id": "47DD3666",
+    "path": "~/gitRepos/ChaPerrone/testing.R",
+    "project_path": "testing.R",
+    "type": "r_source",
+    "hash": "2815799435",
+    "contents": "",
+    "dirty": true,
+    "created": 1631202133735.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "9,50",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1631579964,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1631579964127,
+    "read_only": false,
+    "read_only_alternatives": []
+}
